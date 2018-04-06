@@ -9,7 +9,6 @@ Begin VB.Form Form1
    ClientWidth     =   6030
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   MinButton       =   0   'False
    ScaleHeight     =   6570
    ScaleWidth      =   6030
    Begin MSComDlg.CommonDialog CommonDialog1 
@@ -2560,10 +2559,28 @@ Private Declare Function Inp Lib "portio" Alias "_Inp@4" (ByVal Port As Integer)
 Private Declare Function Outp Lib "portio" Alias "_Outp@8" (ByVal Port As Integer, ByVal Data As Long) As Long
 Private Declare Sub CPUIntCtrl Lib "portio" Alias "_CPUIntCtrl@4" (ByVal Enable As Long)
 
+Private Declare Function LoadGiveIO Lib "portio" Alias "_LoadGiveIO@4" (ByVal szDriverName As String) As Long
+Private Declare Function UnloadDriver Lib "portio" Alias "_UnloadDriver@4" (ByVal szDriverName As String) As Long
+
+#If 0 Then
+Private Function Inp(Port As Integer) As Long
+    Inp = 0
+End Function
+
+Private Function Outp(Port As Integer, Data As Long) As Long
+    Outp = 0
+End Function
+#End If
+
 '*** Form ********************************************************************
 Private Sub Form_Load()
     PIOBase = &H378
     
+    If (LoadGiveIO("STERM_GiveIO") = 0) Then
+        MsgBox ("GiveIO.sys のロードに失敗しました")
+    End If
+    
+    HookWindowProc
     ResetTerminal_Click
     
     OutputMsgLn ("===============================================")
@@ -2572,6 +2589,16 @@ Private Sub Form_Load()
     OutputMsgLn ("===============================================")
     
     Timer.Enabled = True
+    
+End Sub
+
+Private Sub Form_Unload(cancel As Integer)
+    Timer.Enabled = False
+    UnhookWindowProc
+    
+    If (UnloadDriver("STERM_GiveIO") = 0) Then
+        MsgBox ("GiveIO.sys のアンロードに失敗しました")
+    End If
 End Sub
 
 '*** ボタン push *************************************************************
@@ -2680,7 +2707,7 @@ Private Sub Text1_KeyPress(KeyAscii As Integer)
 End Sub
 
 ' console にメッセージ出力
-Private Sub OutputMsg(Msg As String)
+Public Sub OutputMsg(Msg As String)
     MessageTextBuf = MessageTextBuf & Msg
     
     #If (Not bBufferedMsg) Then
@@ -2688,11 +2715,14 @@ Private Sub OutputMsg(Msg As String)
     #End If
 End Sub
 
-Private Sub OutputMsgLn(Msg As String)
+Public Sub OutputMsgLn(Msg As String)
     OutputMsg (Msg + Chr(13) + Chr(10))
 End Sub
 
-Private Sub OutputMsgDraw()
+Public Sub OutputMsgDraw()
+    
+    If (MessageTextBuf = "") Then Exit Sub
+    
     ' 選択解除 & カーソルを最後尾に
     Text1.SelStart = 65535
     
@@ -2781,26 +2811,6 @@ Private Sub ResetTerminal_Click()
     Call Outp(PIOBase + 2, &H6) '37A
     Call Outp(PIOBase + 2, &H4) '37A
     
-End Sub
-
-'*** activate / deactivate window ********************************************
-
-Private Sub Form_GotFocus()
-    Timer.Enabled = True
-End Sub
-
-Private Sub Form_LostFocus()
-    If (CommOnFocus.Checked) Then
-        Timer.Enabled = False
-        
-        #If (bDebug) Then
-            OutputMsgLn ("Timer disabled")
-        #End If
-    End If
-    
-    If (MessageTextBuf <> "") Then
-        Call OutputMsgDraw
-    End If
 End Sub
 
 '*** port IO function ********************************************************
