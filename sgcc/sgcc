@@ -1,0 +1,41 @@
+#!/bin/make -f
+# makefile for STORM
+
+.SUFFIXES: .s .mif
+.SILENT:
+
+SGCCDIR		= $(HOME)/sgcc
+SGCCLIBDIR	= $(SGCCDIR)/lib
+
+CC = xgcc
+AS = stormas.pl
+MAKE = sgcc
+CFLAGS = -I$(SGCCLIBDIR) -O2 -w #-da
+AFLAGS = -lfs #-L$(SGCCLIBDIR)
+
+usage:
+	@echo "usage : $(MAKE) [c=<cc option>] [a=<has option>] <target file>"
+
+.c.s:
+	# compile src
+	$(CC) -S $(CFLAGS) $(c) $<
+	
+	# create header
+	$(AS) $(AFLAGS) -h $@
+	
+	# compile lib
+	$(CC) -S $(CFLAGS) $(c) -I. $(SGCCLIBDIR)/stormlib.c
+	
+	# cat .s + lib
+	perl -pe 's/(\w)\$$(\w)/$$1Lib\$$$$2/g' stormlib.s | cat $@ - > $@_tmp
+	mv -f $@_tmp $@
+	rm stormlib.s storm_uselib.h
+	
+.s.mif:
+	$(AS) $(AFLAGS) $(a) $<
+
+.c:
+	gcc -O3 -w -I$(SGCCLIBDIR) $(c) -o $@ $<
+
+clean:
+	-rm -f *.s *.mif *.obj *.lst *.log *_tmp *~ stormlib.s storm_uselib.h
