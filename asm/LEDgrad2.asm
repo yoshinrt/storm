@@ -1,15 +1,6 @@
 # LED gradation
 
-macro	GRADATION
-	mov	r1, 0x80
-	mov	r1, 0xE8
-	mov	r1, 0xE0
-	mov	r1, 0xFA
-	mov	r1, 0xD0
-	mov	r1, 0xFC
-	mov	r1, 0xF4
-	mov	r1, 0xFF
-endm
+macro	GRADATION	mov r1,0x80\;mov r1,0xE8\;mov r1,0xE0\;mov r1,0xFA\;mov r1,0xD0\;mov r1,0xFC\;mov r1,0xF4\;mov r1,0xFF
 
 GRADATION; GRADATION; GRADATION; GRADATION; GRADATION; GRADATION; GRADATION; GRADATION;
 GRADATION; GRADATION; GRADATION; GRADATION; GRADATION; GRADATION; GRADATION; GRADATION;

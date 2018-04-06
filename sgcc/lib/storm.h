@@ -18,9 +18,6 @@
 #define SIGN_BIT	0x8000
 #define WORD_MASK	0xFFFF
 
-#define FALSE		0
-#define TRUE		( !FALSE )
-
 enum{
 	PORT_GetButt,
 	PORT_SetButt,
@@ -33,8 +30,6 @@ enum{
 	PORT_Putc,
 	PORT_DataL,
 	PORT_DataH,
-	PORT_ResetTerm,
-	PORT_VOID,
 };
 
 /*** new type ***************************************************************/

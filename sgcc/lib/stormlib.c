@@ -32,7 +32,7 @@ UINT GetButton( void ){
 #ifdef USELIB_PutStr
 #define USELIB_PortOutput
 void PutStr( char *s ){
-	while( *s ) PortOutput( PORT_Putc, *s++ );
+	while( *s ) PortOutput( PORT_Putc, *s );
 }
 #endif
 
@@ -161,29 +161,6 @@ UINT _shl( UINT u, UINT cnt ){
 int _sar( int i, UINT cnt ){
 	do i >>= 1; while( --cnt );
 	return( i );
-}
-#endif
-
-/*** rand() *****************************************************************/
-
-#ifdef USELIB_Random
-UINT uRandomSeed = 0xABCD;
-
-UINT Random( void ){
-	UINT	uRet = uRandomSeed;
-	
-	asm(
-		"shl	%0;"
-		"movi	r1, 0x1021;"
-		"mov	r2, 0;"
-		"sbb	r2, 0;"
-		"inc	%0;"
-		"and	r1, r2;"
-		"xor	%0, r1;"
-		: "=l" ( uRet ) : "0" ( uRet ) : "r1", "r2"
-	);
-	
-	return( uRandomSeed = uRet );
 }
 #endif
 

@@ -11,7 +11,7 @@ CC = xgcc
 AS = stormas.pl
 MAKE = sgcc
 CFLAGS = -I$(SGCCLIBDIR) -O2 -w #-da
-AFLAGS = -lfs #-L$(SGCCLIBDIR)
+AFLAGS = -l #-L$(SGCCLIBDIR)
 
 usage:
 	@echo "usage : $(MAKE) [c=<cc option>] [a=<has option>] <target file>"
@@ -38,4 +38,4 @@ usage:
 	gcc -O3 -w -I$(SGCCLIBDIR) $(c) -o $@ $<
 
 clean:
-	-rm -f *.s *.mif *.obj *.lst *.log *_tmp *~ stormlib.s storm_uselib.h
+	-rm -f *.s *.mif *.lst *.log *_tmp *~ stormlib.s storm_uselib.h

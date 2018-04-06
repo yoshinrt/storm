@@ -7,13 +7,11 @@ $header
 		
 		STORM_TEST.def.v -- STORM test bench
 
-2001.11.13	Not include IRAM.v DRAM.v
-
 *****************************************************************************/
 
 `timescale 1ns/1ns
 
-#include "storm.def.v"
+#include "STORM.def.v"
 
 /****************************************************************************/
 
@@ -36,56 +34,45 @@ integer		fd;
 		fd		= $fopen( "STORM_exec.log" );
 	#endif
 		
-		iClk	= 1;
-		iRst	<= 1;
+		Clk		= 1;
+		Reset	= 1;
+		TSC		= -4;
 		
-	#ifdef PIO_MODE
-		iCtrl	<= 0;
-		iPData	<= 0;
-	#endif
-		
-	#ifdef PUSH_SW
-		iPushSW	<= 0;
-		iDipSW	<= 0;
-	#endif
-	
-		TSC		<= -6;
-	
 	#( STEP / 2 );
-		iRst	<= 0;
+		Reset	= 0;
 	end
 	
-	always #( STEP / 2 )	iClk = ~iClk;
+	always #( STEP / 2 )	Clk = ~Clk;
 	
-	always@( posedge iClk ) begin
+	always@( posedge Clk ) begin
 		
-		PC4 <= PC3;
-		PC3 <= PC2;
-		PC2 <= PC1;
-		PC1 <= STORM.STORM_CORE.IF_PC - 1;
+		PC4 = PC3;
+		PC3 = PC2;
+		PC2 = PC1;
+		PC1 = STORMInst.STORM_COREInst.IF_PC - 1;
 		
-		IR0	<= STORM.IRAM.ROM[PC3];
-		IR	<= STORM.IRAM.ROM[PC4];
+		IR0	= STORMInst.IRAMInst.lpm_rom_component.ROM[PC3];
+		IR	= STORMInst.IRAMInst.lpm_rom_component.ROM[PC4];
 		
-		FG4 <= FG3;
-		FG3 <= { STORM.STORM_CORE.EXStage.FlagRegO,
-				 STORM.STORM_CORE.EXStage.FlagRegS,
-				 STORM.STORM_CORE.EXStage.FlagRegZ,
-				 STORM.STORM_CORE.EXStage.FlagRegC };
+		FG4 = FG3;
+		FG3 = { STORMInst.STORM_COREInst.EXStageInst.FlagRegO,
+				STORMInst.STORM_COREInst.EXStageInst.FlagRegS,
+				STORMInst.STORM_COREInst.EXStageInst.FlagRegZ,
+				STORMInst.STORM_COREInst.EXStageInst.FlagRegC };
 		
 	#ifdef OUTPUT_LOG
 		// output log
 		
 		if( TSC >= 0 ) begin
 			$fdisplay( fd, "%h %h %h %h %h %h %h %h %s%s%s%s %s%h:%h",
-				STORM.STORM_CORE.WBStage.oWB_Reg0,
-				STORM.STORM_CORE.WBStage.oWB_Reg1,
-				STORM.STORM_CORE.WBStage.oWB_Reg2,
-				STORM.STORM_CORE.WBStage.oWB_Reg3,
-				STORM.STORM_CORE.WBStage.oWB_Reg4,
-				STORM.STORM_CORE.WBStage.oWB_Reg5,
-				STORM.STORM_CORE.WBStage.oWB_Reg6,
-				STORM.STORM_CORE.WBStage.oWB_Reg7,
+				STORMInst.STORM_COREInst.WBStageInst.oWB_Reg0,
+				STORMInst.STORM_COREInst.WBStageInst.oWB_Reg1,
+				STORMInst.STORM_COREInst.WBStageInst.oWB_Reg2,
+				STORMInst.STORM_COREInst.WBStageInst.oWB_Reg3,
+				STORMInst.STORM_COREInst.WBStageInst.oWB_Reg4,
+				STORMInst.STORM_COREInst.WBStageInst.oWB_Reg5,
+				STORMInst.STORM_COREInst.WBStageInst.oWB_Reg6,
+				STORMInst.STORM_COREInst.WBStageInst.oWB_Reg7,
 				( FG4[ 3 ] === 1 ? "O" : FG4[ 3 ] === 0 ? "." : "?" ),
 				( FG4[ 2 ] === 1 ? "-" : FG4[ 2 ] === 0 ? "+" : "?" ),
 				( FG4[ 1 ] === 1 ? "Z" : FG4[ 1 ] === 0 ? "." : "?" ),
@@ -96,7 +83,7 @@ integer		fd;
 		end
 	#endif
 		
-		if(( IR == 16'hEFFF || IR === 16'hxxxx || PC4 === tADDRI_W'bx ) && TSC >= 0 ) begin
+		if(( IR == 16'hCFFF || IR === 16'hxxxx || PC4 === tADDRI_W'bx ) && TSC >= 0 ) begin
 			if( IR === 16'hxxxx || PC4 === tADDRI_W'bx )
 				$display( "***** STORM crashed!! *****" );
 			
@@ -125,9 +112,9 @@ begin
 		if( i % 16 == 0 ) $fwrite( fd, "%h:", i[11:0] );
 		
 		if( i % 16 == 15 )
-			$fdisplay( fd, " %h", STORM.IRAM.ROM[ i ] );
+			$fdisplay( fd, " %h", STORMInst.IRAMInst.lpm_rom_component.ROM[ i ] );
 		else
-			$fwrite  ( fd, " %h", STORM.IRAM.ROM[ i ] );
+			$fwrite  ( fd, " %h", STORMInst.IRAMInst.lpm_rom_component.ROM[ i ] );
 	end
 end endtask
 
@@ -143,29 +130,44 @@ begin
 		if( i % 16 == 0 ) $fwrite( fd, "%h:", i[11:0] );
 		
 		if( i % 16 == 15 )
-			$fdisplay( fd, " %h", STORM.DRAM.RAM[ i ] );
+			$fdisplay( fd, " %h", STORMInst.DRAMInst.lpm_ram_dq_component.RAM[ i ] );
 		else
-			$fwrite  ( fd, " %h", STORM.DRAM.RAM[ i ] );
+			$fwrite  ( fd, " %h", STORMInst.DRAMInst.lpm_ram_dq_component.RAM[ i ] );
 	end
 end endtask
 
 endmodule
 
+#include "IRAM.v"
+#include "DRAM.v"
+
 /*** TEXT ROM ***************************************************************/
 
-module IRAM(
-	// I/O port
-	input	tADDRI	address;
-	output	tDATA	q;
-);
+module lpm_rom;
+
+// I/O port
+
+#ifndef ASYNC_IRAM
+input			inclock;
+#endif
+input	tADDRI	address;
+output	tDATA	q;
 
 // reg / wire
 
 reg		tDATA	ROM[0:511];
 reg		tADDRI	RegAddr;
 
+// parameter (dummy)
+
+parameter LPM_WIDTH				= 8;
+parameter LPM_WIDTHAD			= 8;
+parameter LPM_ADDRESS_CONTROL	= "REGISTERED";
+parameter LPM_OUTDATA			= "UNREGISTERED";
+parameter LPM_FILE				= "text.mif";
+
 	initial begin
-		$readmemh( "text.obj", ROM );
+		$readmemh( "text.dat", ROM );
 		RegAddr	= 0;
 	end
 	
@@ -175,13 +177,17 @@ endmodule
 
 /*** DATA RAM ***************************************************************/
 
-module DRAM(;
-	// I/O port
-	input	tADDRD	address;
-	input			we;
-	input	tDATA	data;
-	output	tDATA	q;
-);
+module lpm_ram_dq;
+
+// I/O port
+
+#ifndef ASYNC_DRAM
+input			inclock;
+#endif
+input	tADDRD	address;
+input			we;
+input	tDATA	data;
+output	tDATA	q;
 
 // reg / wire
 
@@ -191,8 +197,18 @@ reg		tDATA	RegData;
 reg		tADDRD	RegAddr;
 reg				RegWE;
 
+// parameter (dummy)
+
+parameter LPM_WIDTH				= 8;
+parameter LPM_WIDTHAD			= 8;
+parameter LPM_INDATA			= "REGISTERED";
+parameter LPM_ADDRESS_CONTROL	= "REGISTERED";
+parameter LPM_OUTDATA			= "UNREGISTERED";
+parameter LPM_FILE				= "data.mif";
+parameter LPM_HINT				= "USE_EAB=ON";
+
 	initial begin
-		$readmemh( "data.obj", RAM );
+		$readmemh( "data.dat", RAM );
 		RegData	<= 0;
 		RegAddr	<= 0;
 		RegWE	<= 0;
@@ -209,20 +225,27 @@ endmodule
 #ifdef USE_ADDER_MACRO
 /*** adder ******************************************************************/
 
-module ADDER(;
-	input	tDATA	dataa;
-	input	tDATA	datab;
-	input			cin;
-	output	tDATA	result;
-	output			cout;
-	output			overflow;
-);
+module ADDER;
+
+input	tDATA	dataa;
+input	tDATA	datab;
+input			cin;
+output	tDATA	result;
+output			cout;
+output			overflow;
+
 // wire / reg
 
 wire	tDATA	Result;
 wire			COut;
 wire			OOut;
 
+// parameter (dummy)
+
+parameter LPM_WIDTH				= 16;
+parameter LPM_DIRECTION			= "ADD";
+parameter ONE_INPUT_IS_CONSTANT	= "NO";
+	
 	assign { COut, Result } = dataa + datab + cin;
 	assign OOut = ( dataa[15] == datab[15] && dataa[15] != result[15] );
 	
@@ -234,62 +257,13 @@ endmodule
 
 #endif
 
-#ifdef PIPELINE_ADDER
-/*** adder 10bit ************************************************************/
-
-module ADDER10(;
-	input	[9:0]	dataa;
-	input	[9:0]	datab;
-	input			cin;
-	output	[9:0]	result;
-	output			cout;
-);
-// wire / reg
-
-wire	[9:0]	Result;
-wire			COut;
-wire			OOut;
-
-	assign { COut, Result } = dataa + datab + cin;
-	
-	assign result	= Result;
-	assign cout		= COut;
-	
-endmodule
-
-/*** adder 6bit *************************************************************/
-
-module ADDER6(;
-	input	[5:0]	dataa;
-	input	[5:0]	datab;
-	input			cin;
-	output	[5:0]	result;
-	output			cout;
-	output			overflow;
-);
-// wire / reg
-
-wire	[5:0]	Result;
-wire			COut;
-wire			OOut;
-
-	assign { COut, Result } = dataa + datab + cin;
-	assign OOut = ( dataa[5] == datab[5] && dataa[5] != result[5] );
-	
-	assign result	= Result;
-	assign cout		= COut;
-	assign overflow	= OOut;
-	
-endmodule
-
-#endif
-
 /*** LCELL ******************************************************************/
 
-module LCELL(;
-	input			in;
-	outreg			out;
-);
+module LCELL;
+
+input			in;
+outreg			out;
+	
 	always@( in ) out <= #3 in;
 	
 endmodule

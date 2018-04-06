@@ -324,7 +324,7 @@ void StormNoticeUpdateCc( rtx exp, rtx insn ){
 	
 	CC_STATUS_INIT;
 	
-	if( GET_CODE( exp )== SET ){
+	/*if( GET_CODE( exp )== SET ){
 		switch ( GET_CODE( SET_SRC( exp ))){
 		  case PLUS:
 		  case MINUS:
@@ -336,14 +336,11 @@ void StormNoticeUpdateCc( rtx exp, rtx insn ){
 		  case ASHIFT:
 		  case ASHIFTRT:
 		  case LSHIFTRT:
-			cc_status.value1 = SET_SRC( exp );
-			
-			if( SET_DEST( exp ) != cc0_rtx )
-				cc_status.value2 = SET_DEST( exp );
+			cc_status.value1 = SET_DEST( exp );
 		  default:
 			break;
 		}
-	}
+	}*/
 }
 
 /*** asm file header ********************************************************/
@@ -384,26 +381,21 @@ void StormAsmFileEnd( FILE *fp ){
 void StormPrintOperand( FILE *fp, rtx x, int code ){
 	
 	int	iSlot;
-	int iFilledSlot;
+	int iFilledSlot = dbr_sequence_length();
 	
 	switch( code ){
 		
 		/*** fill delay slot ************************************************/
 		
 	  case '#':
-		/*
 		iSlot = 1;
 		goto FillSlot;
-		*/
 		
 	  case '@':
-		/*
 		iSlot = 3;
 		
 	  FillSlot:
 		while( iFilledSlot++ < iSlot ) fprintf( fp, "\n\tnop\t# slot" );
-		*/
-		fprintf( fp, ", %d", dbr_sequence_length());
 		break;
 		
 	  case 'S':	// shift operator
@@ -595,14 +587,12 @@ int StormExtraConstraint( rtx x, char c ){
 			GET_CODE( x ) == MEM && CONSTANT_ADDRESS_P( XEXP( x, 0 ))		:
 		*/
 		
-		/*
 		// [r0145] / [???+???]
 		c == 'R' ? GET_CODE( x ) == MEM && (
 		//	StormRegOKForBaseReg( XEXP( x, 0 )) ||
 			RTX_OK_FOR_BASE_P( XEXP( x, 0 ))	&&
 			GET_CODE( XEXP( x, 0 )) == PLUS
 		)																	:
-		*/
 		
 		/*
 		// [imm] / [r7]

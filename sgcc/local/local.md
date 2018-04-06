@@ -10,10 +10,10 @@
 ;	I : 8bit signed imm
 ;	J : 11bit signed imm
 ;	l : r0 - r3 ( load register )
-;	Q : [imm] / R					(NA)
-;	R : [reg +- 8bit]				(NA, same as 'o')
-;	S : [r7] [imm]  call address	(NA)
-;	T : [imm]						(NA)
+;	Q : [imm] / R
+;	R : [reg +- 8bit]
+;	S : [r7] [imm]  call address
+;	T : [imm]
 ;
 ;
 ;	special operands
@@ -57,8 +57,8 @@
 
 ( define_insn "movqi"
 	[( set
-		( match_operand:QI 0 "nonimmediate_operand" "=r,o,m,l,r,l" )
-		( match_operand:QI 1 "general_operand"     "rJs,r,l,m,o,i" ))]
+		( match_operand:QI 0 "nonimmediate_operand" "=r,R,m,l,r,l" )
+		( match_operand:QI 1 "general_operand"      "rJ,r,l,m,R,i" ))]
 	""
 	"@
 	mov\\t%0, %1
@@ -81,36 +81,12 @@
 	"add\\t%0, %2"
 	[( set_attr "type" "alu" )])
 
-( define_peephole
-	[
-	( set
-		( match_operand:QI 0 "register_operand" "=r" )
-		( plus:QI
-			( match_operand:QI 1 "register_operand"  "%0" )
-			( match_operand:QI 2 "nonmemory_operand" "rI" )))
-	( set ( cc0 ) ( compare:QI ( match_dup 0 ) ( const_int 0 )))
-	]
-	""
-	"add\\t%0, %2"
-	[( set_attr "type" "alu" )])
-
 ( define_insn "subqi3"
 	[( set
 		( match_operand:QI 0 "register_operand" "=r" )
 		( minus:QI
 			( match_operand:QI 1 "register_operand"  "0" )
 			( match_operand:QI 2 "nonmemory_operand" "rI" )))]
-	""
-	"sub\\t%0, %2"
-	[( set_attr "type" "alu" )])
-
-( define_peephole
-	[( set
-		( match_operand:QI 0 "register_operand" "=r" )
-		( minus:QI
-			( match_operand:QI 1 "register_operand"  "0" )
-			( match_operand:QI 2 "nonmemory_operand" "rI" )))
-	( set ( cc0 ) ( compare:QI ( match_dup 0 ) ( const_int 0 )))]
 	""
 	"sub\\t%0, %2"
 	[( set_attr "type" "alu" )])
@@ -125,34 +101,12 @@
 	"and\\t%0, %2"
 	[( set_attr "type" "alu" )])
 
-( define_peephole
-	[( set
-		( match_operand:QI 0 "register_operand" "=r" )
-		( and:QI
-			( match_operand:QI 1 "register_operand"  "%0" )
-			( match_operand:QI 2 "nonmemory_operand" "rI" )))
-	( set ( cc0 ) ( compare:QI ( match_dup 0 ) ( const_int 0 )))]
-	""
-	"and\\t%0, %2"
-	[( set_attr "type" "alu" )])
-
 ( define_insn "iorqi3"
 	[( set
 		( match_operand:QI 0 "register_operand" "=r" )
 		( ior:QI
 			( match_operand:QI 1 "register_operand"  "%0" )
 			( match_operand:QI 2 "nonmemory_operand" "rI" )))]
-	""
-	"or\\t%0, %2"
-	[( set_attr "type" "alu" )])
-
-( define_peephole
-	[( set
-		( match_operand:QI 0 "register_operand" "=r" )
-		( ior:QI
-			( match_operand:QI 1 "register_operand"  "%0" )
-			( match_operand:QI 2 "nonmemory_operand" "rI" )))
-	( set ( cc0 ) ( compare:QI ( match_dup 0 ) ( const_int 0 )))]
 	""
 	"or\\t%0, %2"
 	[( set_attr "type" "alu" )])
@@ -167,17 +121,6 @@
 	"xor\\t%0, %2"
 	[( set_attr "type" "alu" )])
 
-( define_peephole
-	[( set
-		( match_operand:QI 0 "register_operand" "=r" )
-		( xor:QI
-			( match_operand:QI 1 "register_operand"  "%0" )
-			( match_operand:QI 2 "nonmemory_operand" "rI" )))
-	( set ( cc0 ) ( compare:QI ( match_dup 0 ) ( const_int 0 )))]
-	""
-	"xor\\t%0, %2"
-	[( set_attr "type" "alu" )])
-
 ( define_insn "one_cmplqi2"
 	[( set
 		( match_operand:QI 0 "register_operand" "=r" )
@@ -187,43 +130,11 @@
 	"not\\t%0"
 	[( set_attr "type" "alu" )])
 
-( define_peephole
-	[( set
-		( match_operand:QI 0 "register_operand" "=r" )
-		( not:QI
-			( match_operand:QI 1 "register_operand" "0" )))
-	( set ( cc0 ) ( compare:QI ( match_dup 0 ) ( const_int 0 )))]
-	""
-	"not\\t%0"
-	[( set_attr "type" "alu" )])
-
 ( define_expand "negqi2"
 	[( set
 		( match_operand:QI 0 "register_operand" "=r,r" )
 		( neg:QI
 			( match_operand:QI 1 "register_operand" "0,r" )))]
-	""
-	"{
-	rtx	TmpReg = gen_reg_rtx( QImode );
-	
-	if( which_alternative == 0 ){
-		// neg r0, r0 --> not r0, r0; inc r0
-		emit_insn( gen_xorqi3( TmpReg, operands[ 0 ], gen_rtx( CONST_INT, VOIDmode, -1 )));
-		emit_insn( gen_addqi3( operands[ 0 ], TmpReg, gen_rtx( CONST_INT, VOIDmode,  1 )));
-	}else{
-		// neg r0, r1 --> mov r0, 0; sub r0, r1
-		emit_insn( gen_movqi ( TmpReg, gen_rtx( CONST_INT, VOIDmode, 0 )));
-		emit_insn( gen_subqi3( operands[ 0 ], TmpReg, operands[ 1 ] ));
-	}
-	DONE;
-	}" )
-
-( define_peephole
-	[( set
-		( match_operand:QI 0 "register_operand" "=r,r" )
-		( neg:QI
-			( match_operand:QI 1 "register_operand" "0,r" )))
-	( set ( cc0 ) ( compare:QI ( match_dup 0 ) ( const_int 0 )))]
 	""
 	"{
 	rtx	TmpReg = gen_reg_rtx( QImode );

@@ -126,10 +126,10 @@ enum reg_class {
 #define REG_CLASS_FROM_LETTER( C )		(( C ) == 'l' ? LOAD_REGS : NO_REGS )
 
 #define REGNO_OK_FOR_BASE_P( NUM )	( \
-	( NUM ) == 0 || \
-	( NUM ) == 1 || \
-	( NUM ) == 4 || \
-	( NUM ) == 5 )
+	( NUM ) == 0 || ( unsigned )reg_renumber[ NUM ] == 0 || \
+	( NUM ) == 1 || ( unsigned )reg_renumber[ NUM ] == 1 || \
+	( NUM ) == 4 || ( unsigned )reg_renumber[ NUM ] == 4 || \
+	( NUM ) == 5 || ( unsigned )reg_renumber[ NUM ] == 5 )
 /*
 #define REGNO_OK_FOR_BASE_P( NUM )	( \
 	( NUM ) < FIRST_PSEUDO_REGISTER || \
@@ -270,9 +270,9 @@ enum reg_class {
 	if( StormGoIfLegitimateAddress(( MODE ), ( X ))) goto LABEL;
 
 #ifdef REG_OK_STRICT
-#define REG_OK_FOR_BASE_P(X)	REG_OK_FOR_BASE_P_STRICT( X, 1 )
+#define REG_OK_FOR_BASE_P(X)	REG_OK_FOR_BASE_P_STRICT(X, 1)
 #else /* REG_OK_STRICT */
-#define REG_OK_FOR_BASE_P(X)	REG_OK_FOR_BASE_P_STRICT( X, 0 )
+#define REG_OK_FOR_BASE_P(X)	1
 #endif /* REG_OK_STRICT */
 
 #define REG_OK_FOR_INDEX_P(X)	0
@@ -322,7 +322,7 @@ enum reg_class {
   case UDIV:									\
   case MOD:										\
   case UMOD:									\
-	return( 400 * 2 );							\
+	return( 100 * 2 );							\
   case ASHIFT:									\
   case ASHIFTRT:								\
   case LSHIFTRT:								\
@@ -365,13 +365,6 @@ enum reg_class {
 
 #define ASM_OUTPUT_BYTE(STREAM, VALUE) \
   fprintf ((STREAM), "\t%s\t0x%x\n", ASM_BYTE_OP, (VALUE))
-
-#define ASM_OUTPUT_ASCII( STREAM, PTR, LEN )	{								\
-	int	i;																		\
-	fprintf( STREAM, "\tdw\t" );												\
-	for( i = 0; i < LEN; ++i )													\
-		fprintf( STREAM, ( i == ( LEN ) - 1 ) ? "%d\n" : "%d, ", PTR[ i ] );	\
-}
 
 #define ASM_BYTE_OP		"db"
 #define ASM_OPEN_PAREN	"("
@@ -497,7 +490,7 @@ enum reg_class {
 #define Pmode				QImode
 #define FUNCTION_MODE		QImode
 
-#define STORM_MAX_EXPAND_SHIFT		4
+#define STORM_MAX_EXPAND_SHIFT		3
 #define STORM_MAX_REGNUM			8	/* STORM でサポートする reg の最大数*/
 #define STORM_MIN_REGNUM			8	/* STORM でサポートする reg の最小数*/
 #define STORM_RESERVED_REGNUM		4	/* sp, fp などの制限された reg 数	*/

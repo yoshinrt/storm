@@ -1,3 +1,36 @@
+--- V1.22 (S-II)---
+		FEDCBA9876543210
+mov	r,i	00dddiiiiiiiiiii
+mov	r,m	01ddd0mmiiiiiiii
+mov	m,r	01sss1mmiiiiiiii
+add	r,i	10dddAAAiiiiiiii
+jmp	i	1100iiiiiiiiiiii
+jcc	i	1101CCCCiiiiiiii
+nop		11011110--------
+movh	r,i	1110iiiiiidddiii
+add	r,r	11110AAA0-dddsss
+sh	r	11110AAA1-dddsss
+mov	r,r	1111100---dddsss
+jmp	r	1111101------sss
+spc		1111110---ddd---
+
+mm
+00	r0 + imm
+01	r1 + imm
+10	r4 + imm
+11	r5 + imm
+
+SS, DD	r0 - r3
+
+AAAA:
+add	adc	sub	sbb	and	or	cmp	xor
+sar	neg	shr	shl	czx	csx	pack
+
+Eeven/odd flag ’Ç‰Á‚µ‚ÄC‰ÁZŠí‚Ì bit0 ‚ğí‚É•Û
+	movsx:rm	mov r, m; csx r, r
+	movb:mrr	mov r1, m; pack r1, r2; mov m, r1
+EDelay-slot ’†‚Ì jmp Œn–½—ß‚ğ–³Œø‰»
+
 --- V1.21 ---
 		FEDCBA9876543210
 mov	r,i	00dddiiiiiiiiiii
@@ -16,14 +49,6 @@ spc		1111110---ddd---
 nop		1111111---------
 
 in, out --- mov [r+imm], r ‚É bit14 ‚ğ H ‚É‚·‚é
-
-mm
-00	r0 + imm
-01	r1 + imm
-10	r4 + imm
-11	r5 + imm
-
-SS, DD	r0 - r3
 
 --- V2.1 ---
 		FEDCBA9876543210
