@@ -1,4 +1,3 @@
---- V1.21 ---
 		FEDCBA9876543210
 mov	r,i	00dddiiiiiiiiiii
 mov	r,m	01ddd0mmiiiiiiii
@@ -24,54 +23,3 @@ mm
 11	r5 + imm
 
 SS, DD	r0 - r3
-
---- V2.1 ---
-		FEDCBA9876543210
-ldzx	r,[m]	00mm00ddiiiiiiii
-ldsx	r,[m]	00mm01ddiiiiiiii
-ld	r,[m]	01mm0dddiiiiiiii
-stob	[m],r	00mm1dddiiiiiiii
-stow	[m],r	01mm1dddiiiiiiii
-add	r,i	10AAAdddiiiiiiii
-jcc	i	110CCCCiiiiiiiii
-mov	r,i	1110Fdddiiiiiiii
-
-ld/st	r,[r+i]	1111000lzzdddmmm imm
-add	r,i	1111001AAAdddsss imm
-movi	r	1111010---ddd--- imm
-jmp	i	1111011-----CCCC imm
-
-add/sh	r,r	111110AAAAdddsss
-in	r,r	111111000-dddppp
-out	r,r	111111001-sssppp
-jmp	r	111111010----sss
-spc		111111011-ddd---
-flush		11111110--------
-nop		11111111--------
-
-AAAA:
-add	adc	sub	sbb	and	or	cmp	xor
-shr	shl	sar		mov	movh	movsx	movzx
-
-
---- V1 ---
-		FEDCBA9876543210
-mov	r,i	00dddiiiiiiiiiii
-mov	r,m	01ddd0mmiiiiiiii
-mov	m,r	01sss1mmiiiiiiii
-add	r,i	10dddAAAiiiiiiii
-jcc	i	1100CCCCiiiiiiii
-jmp	i	1101-iiiiiiiiiii
-add	r,r	11100AAA--dddsss
-sh	r	11101AAA--dddsss
-movh	r,i	11110dddiiiiiiii
-mov	r,r	1111100---dddsss
-jmp	r	1111101------sss
-spc		1111110---ddd---
-hlt		1111111---------
-
-mm
-00	r4 + imm
-01	r5 + imm
-10	r6 + imm
-11	imm
