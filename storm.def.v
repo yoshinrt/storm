@@ -55,7 +55,6 @@
 #define LED_MATRIX			// use EXT Board LED Matrix
 #define PUSH_SW				// use EXT Board Push/Dip SW
 #define SAFELY_PIO			// safely PIO sequence
-#define OUTPUT_LOG			// output execution log ( for TESTBENCH )
 
 /*** const ******************************************************************/
 

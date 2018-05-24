@@ -2,7 +2,7 @@
 rs	equ	r5
 rr	equ	r7
 
-DataSize equ	64
+DataSize equ	0x3A0
 	text
 	
 	# create random data
@@ -194,7 +194,7 @@ __L48:
 	hlt
 	data
 _iData:
-	skip	256
+	skip	DataSize
 _r__0:
 	db	0xffffabcd
 

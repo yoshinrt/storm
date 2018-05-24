@@ -1279,7 +1279,7 @@ sub Simulator{
 				printf( fpLog "   $SrcBuf[ $PC ]\n" );
 			}
 		}else{
-			print( '\n' );
+			print( fpLog "\n" );
 		}
 		
 		# オペコードの判定

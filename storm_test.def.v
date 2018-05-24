@@ -19,9 +19,8 @@ $header
 
 testmodule STORM_TEST;
 
-reg		tDATA	IR,  IR0;
-reg		tADDRI	PC0, PC1, PC2, PC3, PC4;
-reg		[3:0]	FG3, FG4;
+reg		tADDRI	PC2, PC3, PC4;
+reg		[3:0]	FG4;
 
 parameter	STEP =	24;
 integer		TSC;
@@ -32,9 +31,13 @@ integer		fd;
 	);
 	
 	initial begin
-	#ifdef OUTPUT_LOG
+	`ifdef OUTPUT_LOG
 		fd		= $fopen( "STORM_exec.log" );
-	#endif
+	`endif
+	`ifdef VCD_WAVE
+		$dumpfile( "storm.vcd" );
+		$dumpvars;
+	`endif
 		
 		iClk	= 1;
 		iRst	<= 1;
@@ -49,7 +52,7 @@ integer		fd;
 		iDipSW	<= 0;
 	#endif
 	
-		TSC		<= -6;
+		TSC		<= -4;
 	
 	#( STEP / 2 );
 		iRst	<= 0;
@@ -57,23 +60,20 @@ integer		fd;
 	
 	always #( STEP / 2 )	iClk = ~iClk;
 	
+	wire tDATA	IR = STORM.IRAM.ROM[PC4];
+	
 	always@( posedge iClk ) begin
 		
 		PC4 <= PC3;
 		PC3 <= PC2;
-		PC2 <= PC1;
-		PC1 <= STORM.STORM_CORE.IF_PC - 1;
+		PC2 <= STORM.STORM_CORE.IF_PC - 1;
 		
-		IR0	<= STORM.IRAM.ROM[PC3];
-		IR	<= STORM.IRAM.ROM[PC4];
-		
-		FG4 <= FG3;
-		FG3 <= { STORM.STORM_CORE.EXStage.FlagRegO,
+		FG4 <= { STORM.STORM_CORE.EXStage.FlagRegO,
 				 STORM.STORM_CORE.EXStage.FlagRegS,
 				 STORM.STORM_CORE.EXStage.FlagRegZ,
 				 STORM.STORM_CORE.EXStage.FlagRegC };
 		
-	#ifdef OUTPUT_LOG
+	`ifdef OUTPUT_LOG
 		// output log
 		
 		if( TSC >= 0 ) begin
@@ -94,17 +94,17 @@ integer		fd;
 				PC4, IR
 			);
 		end
-	#endif
+	`endif
 		
 		if(( IR == 16'hEFFF || IR === 16'hxxxx || PC4 === tADDRI_W'bx ) && TSC >= 0 ) begin
 			if( IR === 16'hxxxx || PC4 === tADDRI_W'bx )
 				$display( "***** STORM crashed!! *****" );
 			
-		#ifdef OUTPUT_LOG
+		`ifdef OUTPUT_LOG
 			DumpIRAM;
 			DumpDRAM;
 			$fclose( fd );
-		#endif
+		`endif
 			$finish;
 		end
 		
