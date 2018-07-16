@@ -1,3 +1,3 @@
 [submodule "vpp"]
 	path = vpp
-	url = git@bitbucket.org:yoshinrt/vpp.git
+	url = https://github.com/yoshinrt/vpp.git
